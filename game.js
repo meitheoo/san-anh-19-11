@@ -65,6 +65,7 @@ PERKS[0].riddle=RD.maze;PERKS[1].riddle=RD.sudoku;Object.values(CLUES).forEach(L
 const SPOTNAME=id=>SPOTS.find(s=>s.id===id).name;
 let db=null,dbState='loading',all=[],cur=null,lastBtn=null,sketchOn=true,curK=0;
 function unlocked(){
+ return true;
  if(location.hash==='#mo')return true;
  const d=new Date(Date.now()+7*3600*1000);
  return d.getUTCFullYear()>2026||(d.getUTCFullYear()===2026&&(d.getUTCMonth()>10||(d.getUTCMonth()===10&&d.getUTCDate()>=19)));
@@ -104,6 +105,15 @@ $('back2').addEventListener('click',()=>screen('s-start'));
 function renderWishes(){
  const zb=$('wishzone'),zo=!!(zb&&zb.classList.contains('show'));
  const p=PEOPLE[cur],box=zo?$('wzlist'):$('wlist');box.textContent='';
+ if(zo&&GUEST){
+  if(dbState==='loading'){box.textContent='Đang tải lời chúc...';return}
+  if(dbState!=='ready'){box.textContent='Chưa kết nối được kho lời chúc. Bạn thử tải lại trang nhé.';return}
+  let any=false;
+  PEOPLE.forEach(q=>{const ws=all.filter(w=>w.to===q.id).sort((a,b)=>(a.at||0)-(b.at||0));if(!ws.length)return;any=true;
+   const h=document.createElement('div');h.style.cssText='color:#ffd27a;font-weight:800;margin:10px 0 4px';h.textContent='Gửi '+q.name;box.appendChild(h);
+   ws.forEach(w=>{const d=document.createElement('div');d.className='wish';const m=document.createElement('div');m.className='m';m.textContent=w.text;const f=document.createElement('div');f.className='f';f.textContent='// '+(w.from||'Một người bạn');d.appendChild(m);d.appendChild(f);box.appendChild(d)})});
+  if(!any){const d=document.createElement('div');d.className='note';d.textContent='Chưa có lời chúc nào.';box.appendChild(d)}
+  return}
  const mine=all.filter(w=>w.to===p.id).sort((a,b)=>(a.at||0)-(b.at||0));
  const note=txt=>{const d=document.createElement('div');d.className='note';d.textContent=txt;box.appendChild(d)};
  if(dbState==='loading'){note('Đang tải lời chúc...');return}
@@ -272,13 +282,13 @@ function openWishZone(){
   $('wzx').onclick=cl;z.addEventListener('click',e=>{if(e.target===z)cl()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&z.classList.contains('show'))cl()});
  }
- cur=me;PLAYER_DONE=true;
- $('wzh').textContent='$ cat ~/'+PEOPLE[me].id+'/loi_chuc.txt';$('wzt').textContent='Lời chúc dành cho '+PEOPLE[me].name;
+ cur=GUEST?0:me;PLAYER_DONE=true;
+ $('wzh').textContent=GUEST?'$ cat ~/team/loi_chuc_all.txt':'$ cat ~/'+PEOPLE[me].id+'/loi_chuc.txt';$('wzt').textContent=GUEST?'Lời chúc dành cho cả team':'Lời chúc dành cho '+PEOPLE[me].name;
  z.classList.add('show');z.style.display='flex';
  renderWishes();loadWishes();
 }
 function explore(){
- if(near&&near.id==='wish'){if(GUEST){toast('Khu này dành cho các chàng đọc lời chúc. Bạn hãy chạy chơi và viết lời chúc ở trang chính nhé!');return}openWishZone();return}
+ if(near&&near.id==='wish'){openWishZone();return}
  if(GUEST)return;
  if(!near||clueIdx>=CLUELIST.length){if(clueIdx>=CLUELIST.length)finish();else toast('Hãy lại gần một địa điểm trên bản đồ rồi bấm Khám phá.');return}
  let ci=-1;for(let i=0;i<CLUELIST.length;i++)if(!foundSet[i]&&CLUELIST[i].spot===near.id){ci=i;break}
@@ -340,6 +350,7 @@ function loop(now){
  near=null;let nd=1e9;
  SPOTS.forEach(s=>{const d=Math.hypot(s.x-player.x,s.y-player.y);if(d<RAD&&d<nd){nd=d;near=s}});
  $('act').disabled=!near&&clueIdx<CLUELIST.length;
+ if(GUEST)$('act').style.display=(near&&near.id==='wish')?'':'none';
  $('act').textContent=(near&&near.id==='wish')?'Đọc lời chúc':(clueIdx>=CLUELIST.length?'Mở hồ sơ':(near?'Khám phá: '+near.name:'Khám phá'));
  draw(now);requestAnimationFrame(loop);
 }

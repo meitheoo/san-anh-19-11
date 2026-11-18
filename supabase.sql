@@ -15,11 +15,12 @@ drop policy if exists "anyone can send" on public.wishes;
 create policy "anyone can send" on public.wishes
   for insert to anon, authenticated with check (true);
 
--- Chỉ đọc được lời chúc từ 0h ngày 19/11/2026 (giờ Việt Nam)
+-- Đọc được lời chúc bất cứ lúc nào (game chỉ hiện đúng lời của nhân vật đang chơi)
 drop policy if exists "read after 19.11" on public.wishes;
-create policy "read after 19.11" on public.wishes
+drop policy if exists "read anytime" on public.wishes;
+create policy "read anytime" on public.wishes
   for select to anon, authenticated
-  using (now() >= timestamptz '2026-11-19 00:00:00+07');
+  using (true);
 
 -- Đếm số lời chúc (không lộ nội dung) để hiện "Đã có N lời chúc"
 create or replace function public.wish_count()
