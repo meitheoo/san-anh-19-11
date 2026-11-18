@@ -258,7 +258,7 @@ function askRiddle(c){
  const no=document.createElement('button');no.type='button';no.className='ghost';no.textContent='Để sau';no.onclick=()=>o.remove();
  const ok=document.createElement('button');ok.type='button';ok.textContent='Trả lời';
  const go=()=>{if(c.riddle.a.includes(noDia(inp.value).replace(/ /g,''))||c.riddle.a.includes(noDia(inp.value))||(c.riddle.num&&noDia(inp.value).replace(/\D/g,'')===c.riddle.num)){riddleOK[PEOPLE[me].id+c.spot]=true;o.remove();explore()}else{msg.textContent='Chưa đúng, thử lại nhé!';inp.select()}};
- ok.onclick=go;inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')go()});inp.addEventListener('keyup',e=>e.stopPropagation());
+ ok.onclick=go;inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();setTimeout(go,60)}});inp.addEventListener('keyup',e=>e.stopPropagation());
  row.append(no,ok);bx.append(h,q,inp,msg,row);o.appendChild(bx);document.body.appendChild(o);setTimeout(()=>inp.focus(),50);
 }
 function explore(){
