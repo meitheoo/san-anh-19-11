@@ -160,6 +160,7 @@ const cv=$('g'),cx=cv.getContext('2d');
 const CW=cv.width,CH=cv.height,W=1200,H=780;
 const ZOOM=1.25,VW=CW/ZOOM,VH=CH/ZOOM;const cam={x:0,y:0,init:false};
 function camStep(snap){const tx=Math.max(0,Math.min(W-VW,player.x-VW/2)),ty=Math.max(0,Math.min(H-VH,player.y-24-VH/2));if(snap||!cam.init){cam.x=tx;cam.y=ty;cam.init=true}else{cam.x+=(tx-cam.x)*0.14;cam.y+=(ty-cam.y)*0.14}}
+let foundSet={};function nextIdx(){for(let i=0;i<CLUELIST.length;i++)if(!foundSet[i])return i;return CLUELIST.length}
 let me=0,clueIdx=0,wrong=0,visited={},running=false,last=0,keys={},target=null,near=null,hintUntil=0,toastT=null,CLUELIST=[];
 const player={x:600,y:520,face:1,moving:false};
 const avatar={};Object.keys(SPR).forEach(k=>{const im=new Image();im.src=SPR[k];avatar[k]=im});
@@ -175,8 +176,8 @@ function startGame(i){
   running=true;last=performance.now();requestAnimationFrame(loop);return;
  }
  GUEST=false;clueEl.style.display='';if($('chk'))$('chk').style.display='';$('act').style.display='';
- me=i;CLUELIST=CLUES[PEOPLE[i].id];clueIdx=0;wrong=0;visited={};target=null;hintsSeen={};
- try{const v=parseInt(localStorage.getItem(key()),10);if(v>0&&v<=CLUELIST.length){clueIdx=v;CLUELIST.slice(0,v).forEach(c=>visited[c.spot]=true)}}catch(e){}
+ me=i;CLUELIST=CLUES[PEOPLE[i].id];clueIdx=0;wrong=0;visited={};target=null;hintsSeen={};foundSet={};
+ try{const raw=localStorage.getItem(key()+'f');if(raw){JSON.parse(raw).forEach(i=>{if(CLUELIST[i]){foundSet[i]=1;visited[CLUELIST[i].spot]=true}})}else{const v=parseInt(localStorage.getItem(key()),10);if(v>0&&v<=CLUELIST.length){for(let i=0;i<v;i++){foundSet[i]=1;visited[CLUELIST[i].spot]=true}}}clueIdx=Object.keys(foundSet).length}catch(e){}
  try{hintsSeen=JSON.parse(localStorage.getItem(key()+'h')||'{}')||{}}catch(e){hintsSeen={}}
  player.x=400;player.y=360;
  screen('s-game');setClue();running=true;last=performance.now();requestAnimationFrame(loop);
@@ -192,7 +193,7 @@ function updateList(){
  const totalItems=L.reduce((t,c)=>t+(c.perk?1:c.items.length),0);
  h.textContent='Đã tìm '+Math.min(clueIdx,L.length)+'/'+L.length+' manh mối (tổng '+totalItems+' mục: ảnh, clip và phúc lợi)';el.appendChild(h);
  const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:6px';
- L.forEach((c,i)=>{const b=document.createElement('span');const d=i<clueIdx;b.textContent=(d?'✓ ':'○ ')+(i+1)+'. '+lab(c);b.style.cssText='padding:4px 10px;border-radius:999px;font-size:13px;'+(d?'background:#8fcf7e;color:#1d1b2e':'background:rgba(255,255,255,.1);color:#f3ecda');row.appendChild(b)});
+ L.forEach((c,i)=>{const b=document.createElement('span');const d=!!foundSet[i];b.textContent=(d?'✓ ':'○ ')+(i+1)+'. '+lab(c);b.style.cssText='padding:4px 10px;border-radius:999px;font-size:13px;'+(d?'background:#8fcf7e;color:#1d1b2e':'background:rgba(255,255,255,.1);color:#f3ecda');row.appendChild(b)});
  el.appendChild(row);
 }
 let hintOpen=false;
@@ -202,19 +203,19 @@ function hintsLeft(){return Math.max(0,hintBudget()-Object.keys(hintsSeen).lengt
 function renderHint(){
  const done=clueIdx>=CLUELIST.length;
  let bt=$('hbtn');
- if(!bt){bt=document.createElement('button');bt.id='hbtn';bt.type='button';bt.className='ghost';bt.style.cssText='margin-top:8px;padding:8px 16px;font-size:14px';bt.addEventListener('click',()=>{if(hintOpen){hintOpen=false}else if(hintsSeen[clueIdx]||hintsLeft()>0){if(!hintsSeen[clueIdx]){hintsSeen[clueIdx]=1;try{localStorage.setItem(key()+'h',JSON.stringify(hintsSeen))}catch(e){}}hintOpen=true}renderHint()});$('clue-t').after(bt)}
+ if(!bt){bt=document.createElement('button');bt.id='hbtn';bt.type='button';bt.className='ghost';bt.style.cssText='margin-top:8px;padding:8px 16px;font-size:14px';bt.addEventListener('click',()=>{if(hintOpen){hintOpen=false}else if(hintsSeen[nextIdx()]||hintsLeft()>0){if(!hintsSeen[nextIdx()]){hintsSeen[nextIdx()]=1;try{localStorage.setItem(key()+'h',JSON.stringify(hintsSeen))}catch(e){}}hintOpen=true}renderHint()});$('clue-t').after(bt)}
  if(done){bt.hidden=true;$('clue-t').textContent='Bạn đã tìm đủ. Mở hồ sơ để xem lời chúc.';return}
  bt.hidden=false;
  const left=hintsLeft();
- if(hintOpen){$('clue-t').textContent=CLUELIST[clueIdx].text;bt.textContent='Ẩn gợi ý';bt.disabled=false}
- else if(hintsSeen[clueIdx]){$('clue-t').textContent='Bạn đã xem gợi ý của manh mối này, bấm để xem lại (không tốn thêm lượt).';bt.textContent='Xem lại gợi ý (còn '+left+'/'+hintBudget()+' lượt)';bt.disabled=false}
- else if(left>0){$('clue-t').textContent='Hãy chạy quanh văn phòng và khám phá các điểm. Cần giúp thì bấm "Xem gợi ý" (còn '+left+'/'+hintBudget()+' lượt).';bt.textContent='Xem gợi ý (còn '+left+'/'+hintBudget()+' lượt)';bt.disabled=false}
+ if(hintOpen){$('clue-t').textContent=CLUELIST[nextIdx()].text;bt.textContent='Ẩn gợi ý';bt.disabled=false}
+ else if(hintsSeen[nextIdx()]){$('clue-t').textContent='Bạn đã xem gợi ý của manh mối này, bấm để xem lại (không tốn thêm lượt).';bt.textContent='Xem lại gợi ý (còn '+left+'/'+hintBudget()+' lượt)';bt.disabled=false}
+ else if(left>0){$('clue-t').textContent='Hãy chạy quanh văn phòng và khám phá các điểm, tìm theo thứ tự nào cũng được. Cần giúp thì bấm "Xem gợi ý" (còn '+left+'/'+hintBudget()+' lượt).';bt.textContent='Xem gợi ý (còn '+left+'/'+hintBudget()+' lượt)';bt.disabled=false}
  else{$('clue-t').textContent='Bạn đã dùng hết lượt gợi ý ('+hintBudget()+'/'+hintBudget()+'). Hãy tự khám phá nhé!';bt.textContent='Hết lượt gợi ý';bt.disabled=true}
 }
 function setClue(){
  updateList();hintOpen=false;
  if(clueIdx>=CLUELIST.length){$('clue-k').textContent='// hoàn thành';renderHint();return}
- $('clue-k').textContent='$ manh_moi['+(clueIdx+1)+'/'+CLUELIST.length+']';
+ $('clue-k').textContent='$ manh_moi['+clueIdx+'/'+CLUELIST.length+' da tim] // tim theo thu tu tuy y';
  renderHint();
 }
 function riddleExtra(r){
@@ -263,16 +264,17 @@ function askRiddle(c){
 function explore(){
  if(GUEST)return;
  if(!near||clueIdx>=CLUELIST.length){if(clueIdx>=CLUELIST.length)finish();else toast('Hãy lại gần một địa điểm trên bản đồ rồi bấm Khám phá.');return}
- const c=CLUELIST[clueIdx];
- if(near.id===c.spot){
+ let ci=-1;for(let i=0;i<CLUELIST.length;i++)if(!foundSet[i]&&CLUELIST[i].spot===near.id){ci=i;break}
+ const c=ci>=0?CLUELIST[ci]:CLUELIST[nextIdx()];
+ if(ci>=0){
   if(c.riddle&&!riddleOK[PEOPLE[me].id+c.spot]){askRiddle(c);return}
   visited[near.id]=true;wrong=0;
   const its=c.perk?[c.perk]:c.items.map(k=>PEOPLE[me].items[k]);
-  clueIdx++;try{localStorage.setItem(key(),String(clueIdx))}catch(e){}
+  foundSet[ci]=1;clueIdx=Object.keys(foundSet).length;try{localStorage.setItem(key()+'f',JSON.stringify(Object.keys(foundSet).map(Number)))}catch(e){}
   showFound(near,its,clueIdx>=CLUELIST.length);confetti();
  }else{
   wrong++;
-  toast(wrong>=2?'Chưa phải chỗ này. Mình đã đánh dấu gợi ý trên bản đồ, hãy nhìn vòng sáng nhấp nháy.':'Chưa phải chỗ này, thử đọc lại manh mối nhé!');
+  toast(wrong>=2?'Ở đây chưa có gì cho bạn. Mình đã đánh dấu một chỗ còn sót trên bản đồ, hãy nhìn vòng sáng nhấp nháy.':'Ở đây chưa có gì cho bạn (hoặc bạn đã lấy hết rồi). Thử chỗ khác nhé!');
   if(wrong>=2)hintUntil=performance.now()+6000;
  }
 }
@@ -519,7 +521,7 @@ function draw(now){
  SPOTS.forEach(s=>{
   if(visited[s.id]){circ(s.x,s.y-30,11,'#8fcf7e');cx.strokeStyle='#1d1b2e';cx.lineWidth=3;cx.beginPath();cx.moveTo(s.x-5,s.y-30);cx.lineTo(s.x-1,s.y-25);cx.lineTo(s.x+6,s.y-35);cx.stroke()}
  });
- if(now<hintUntil&&clueIdx<CLUELIST.length){const s=SPOTS.find(z=>z.id===CLUELIST[clueIdx].spot);const r=RAD-6+Math.sin(now/150)*8;cx.lineWidth=4;circ(s.x,s.y,r,null,'#ffd27a')}
+ if(now<hintUntil&&clueIdx<CLUELIST.length){const s=SPOTS.find(z=>z.id===CLUELIST[nextIdx()].spot);const r=RAD-6+Math.sin(now/150)*8;cx.lineWidth=4;circ(s.x,s.y,r,null,'#ffd27a')}
  if(near){cx.lineWidth=2;circ(near.x,near.y,RAD,null,'rgba(255,210,122,.85)')}
  syncPeers();
  const live={};Object.keys(PE).forEach(k=>live[PE[k].pi]=1);
@@ -533,7 +535,7 @@ function draw(now){
  });
  cx.restore();
  // minimap
- {const mw=120,mh=78,mx=CW-mw-10,my=CH-mh-10;cx.globalAlpha=.9;cx.drawImage(SC,mx,my,mw,mh);cx.globalAlpha=1;cx.strokeStyle='#ffd27a';cx.lineWidth=2;cx.strokeRect(mx,my,mw,mh);cx.strokeStyle='rgba(255,255,255,.85)';cx.lineWidth=1;cx.strokeRect(mx+cam.x/W*mw,my+cam.y/H*mh,VW/W*mw,VH/H*mh);const cur=clueIdx<CLUELIST.length?SPOTS.find(z=>z.id===CLUELIST[clueIdx].spot):null;if(cur&&now<hintUntil){cx.fillStyle='#ffd27a';cx.beginPath();cx.arc(mx+cur.x/W*mw,my+cur.y/H*mh,3,0,7);cx.fill()}cx.fillStyle='#ff5a7a';cx.beginPath();cx.arc(mx+player.x/W*mw,my+player.y/H*mh,3,0,7);cx.fill()}
+ {const mw=120,mh=78,mx=CW-mw-10,my=CH-mh-10;cx.globalAlpha=.9;cx.drawImage(SC,mx,my,mw,mh);cx.globalAlpha=1;cx.strokeStyle='#ffd27a';cx.lineWidth=2;cx.strokeRect(mx,my,mw,mh);cx.strokeStyle='rgba(255,255,255,.85)';cx.lineWidth=1;cx.strokeRect(mx+cam.x/W*mw,my+cam.y/H*mh,VW/W*mw,VH/H*mh);const cur=clueIdx<CLUELIST.length?SPOTS.find(z=>z.id===CLUELIST[nextIdx()].spot):null;if(cur&&now<hintUntil){cx.fillStyle='#ffd27a';cx.beginPath();cx.arc(mx+cur.x/W*mw,my+cur.y/H*mh,3,0,7);cx.fill()}cx.fillStyle='#ff5a7a';cx.beginPath();cx.arc(mx+player.x/W*mw,my+player.y/H*mh,3,0,7);cx.fill()}
  // online HUD
  const n=1+Object.keys(PE).length;
  cx.font='800 13px Nunito,"Be Vietnam Pro",sans-serif';cx.textAlign='left';
