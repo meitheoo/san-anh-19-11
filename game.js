@@ -93,7 +93,7 @@ mkPick($('pick'),i=>startGame(i));
 (function(){
  const box=document.createElement('div');box.className='pick';box.id='pickg';
  const t=document.createElement('p');t.className='lead';t.textContent='Hoặc vào chạy chung (không có clue):';
- const sp=$('s-start');sp.insertBefore(t,sp.querySelector('.alt'));sp.insertBefore(box,sp.querySelector('.alt'));
+ const sp=$('s-start'),anchor=$('btn-write').parentNode;sp.insertBefore(t,anchor);sp.insertBefore(box,anchor);
  GUESTS.forEach((g,j)=>{const b=document.createElement('button');b.type='button';b.className='pk';b.innerHTML='<img alt="" src="'+SPR[g.id]+'"><b>'+g.name+'</b><small>Chạy chung</small>';b.addEventListener('click',()=>startGame(PEOPLE.length+j));box.appendChild(b)});
 })();
 mkPick($('pick2'),(i,b)=>openProfile(i,b));
