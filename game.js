@@ -608,3 +608,12 @@ async function loadWishes(){
   await loadWishes();
  }catch(e){dbState='error'}
 })();
+
+(function(){const b=document.getElementById('btn-reset');if(!b)return;let armed=0,t=null;
+ b.addEventListener('click',()=>{
+  if(!armed){armed=1;b.textContent='Bấm lần nữa để xoá tiến độ trên máy này';t=setTimeout(()=>{armed=0;b.textContent='Chơi lại từ đầu (reset)'},4000);return}
+  clearTimeout(t);
+  try{Object.keys(localStorage).filter(k=>k.indexOf('hunt-')===0).forEach(k=>localStorage.removeItem(k))}catch(e){}
+  b.textContent='Đã reset, đang tải lại...';setTimeout(()=>location.reload(),300);
+ });
+})();
