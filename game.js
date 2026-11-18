@@ -110,7 +110,7 @@ function renderWishes(){
   if(dbState!=='ready'){box.textContent='Chưa kết nối được kho lời chúc. Bạn thử tải lại trang nhé.';return}
   let any=false;
   PEOPLE.forEach(q=>{const ws=all.filter(w=>w.to===q.id).sort((a,b)=>(a.at||0)-(b.at||0));if(!ws.length)return;any=true;
-   const h=document.createElement('div');h.style.cssText='color:#ffd27a;font-weight:800;margin:10px 0 4px';h.textContent='Gửi '+q.name;box.appendChild(h);
+   const h=document.createElement('div');h.style.cssText='color:#F4EEF3;background:#1F2E87;border-left:4px solid #C79BB8;padding:4px 10px;border-radius:6px;font-weight:800;margin:14px 0 6px';h.textContent='Gửi '+q.name;box.appendChild(h);
    ws.forEach(w=>{const d=document.createElement('div');d.className='wish';const m=document.createElement('div');m.className='m';m.textContent=w.text;const f=document.createElement('div');f.className='f';f.textContent='// '+(w.from||'Một người bạn');d.appendChild(m);d.appendChild(f);box.appendChild(d)})});
   if(!any){const d=document.createElement('div');d.className='note';d.textContent='Chưa có lời chúc nào.';box.appendChild(d)}
   return}
@@ -275,8 +275,8 @@ function askRiddle(c){
 }
 function openWishZone(){
  let z=$('wishzone');
- if(!z){z=document.createElement('div');z.id='wishzone';z.style.cssText='position:fixed;inset:0;z-index:50;background:rgba(10,8,24,.8);display:none;align-items:center;justify-content:center;padding:16px';
-  z.innerHTML='<div style="max-width:520px;width:100%;max-height:86vh;overflow:auto;background:#1d1b2e;border:3px solid #ffd27a;border-radius:16px;padding:18px;color:#f3ecda"><div id="wzh" style="color:#ffd27a;font-weight:800;margin-bottom:4px"></div><div id="wzt" style="font-size:20px;font-weight:900;margin-bottom:10px"></div><div id="wzlist" class="wishes"></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button type="button" id="wzx" class="ghost">Đóng</button></div></div>';
+ if(!z){z=document.createElement('div');z.id='wishzone';z.style.cssText='position:fixed;inset:0;z-index:50;background:rgba(7,20,47,.85);display:none;align-items:center;justify-content:center;padding:16px';
+  z.innerHTML='<div style="max-width:520px;width:100%;max-height:86vh;overflow:auto;background:#0A1F44;border:3px solid #C79BB8;border-radius:16px;padding:18px;color:#F4EEF3;box-shadow:6px 6px 0 #07142F"><div id="wzh" style="color:#34C98A;font-family:var(--mono);font-weight:800;margin-bottom:4px"></div><div id="wzt" style="font-size:20px;font-weight:900;margin-bottom:10px"></div><div id="wzlist" class="wishes"></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button type="button" id="wzx" class="ghost">Đóng</button></div></div>';
   document.body.appendChild(z);
   const cl=()=>{z.classList.remove('show');z.style.display='none';cur=null};
   $('wzx').onclick=cl;z.addEventListener('click',e=>{if(e.target===z)cl()});
