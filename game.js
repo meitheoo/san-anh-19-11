@@ -15,7 +15,8 @@ const SPOTS=[
  {id:'studio',name:'Góc chụp ảnh',x:1039,y:648},
  {id:'water',name:'Máy nước',x:1004,y:450},
  {id:'bin',name:'Thùng rác',x:391,y:524},
- {id:'board',name:'Bảng công việc',x:811,y:200}
+ {id:'board',name:'Bảng công việc',x:811,y:200},
+ {id:'wish',name:'Khu đọc lời chúc',x:916,y:240}
 ];
 const RAD=72;
 const RD={};
@@ -101,7 +102,8 @@ $('back2').addEventListener('click',()=>screen('s-start'));
 
 /* ---------- profile modal: photos, wishes, form ---------- */
 function renderWishes(){
- const p=PEOPLE[cur],box=$('wlist');box.textContent='';
+ const zb=$('wishzone'),zo=!!(zb&&zb.classList.contains('show'));
+ const p=PEOPLE[cur],box=zo?$('wzlist'):$('wlist');box.textContent='';
  const mine=all.filter(w=>w.to===p.id).sort((a,b)=>(a.at||0)-(b.at||0));
  const note=txt=>{const d=document.createElement('div');d.className='note';d.textContent=txt;box.appendChild(d)};
  if(dbState==='loading'){note('Đang tải lời chúc...');return}
@@ -261,7 +263,22 @@ function askRiddle(c){
  ok.onclick=go;inp.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();setTimeout(go,60)}});inp.addEventListener('keyup',e=>e.stopPropagation());
  row.append(no,ok);bx.append(h,q,inp,msg,row);o.appendChild(bx);document.body.appendChild(o);setTimeout(()=>inp.focus(),50);
 }
+function openWishZone(){
+ let z=$('wishzone');
+ if(!z){z=document.createElement('div');z.id='wishzone';z.style.cssText='position:fixed;inset:0;z-index:50;background:rgba(10,8,24,.8);display:none;align-items:center;justify-content:center;padding:16px';
+  z.innerHTML='<div style="max-width:520px;width:100%;max-height:86vh;overflow:auto;background:#1d1b2e;border:3px solid #ffd27a;border-radius:16px;padding:18px;color:#f3ecda"><div id="wzh" style="color:#ffd27a;font-weight:800;margin-bottom:4px"></div><div id="wzt" style="font-size:20px;font-weight:900;margin-bottom:10px"></div><div id="wzlist" class="wishes"></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button type="button" id="wzx" class="ghost">Đóng</button></div></div>';
+  document.body.appendChild(z);
+  const cl=()=>{z.classList.remove('show');z.style.display='none';cur=null};
+  $('wzx').onclick=cl;z.addEventListener('click',e=>{if(e.target===z)cl()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&z.classList.contains('show'))cl()});
+ }
+ cur=me;PLAYER_DONE=true;
+ $('wzh').textContent='$ cat ~/'+PEOPLE[me].id+'/loi_chuc.txt';$('wzt').textContent='Lời chúc dành cho '+PEOPLE[me].name;
+ z.classList.add('show');z.style.display='flex';
+ renderWishes();loadWishes();
+}
 function explore(){
+ if(near&&near.id==='wish'){if(GUEST){toast('Khu này dành cho các chàng đọc lời chúc. Bạn hãy chạy chơi và viết lời chúc ở trang chính nhé!');return}openWishZone();return}
  if(GUEST)return;
  if(!near||clueIdx>=CLUELIST.length){if(clueIdx>=CLUELIST.length)finish();else toast('Hãy lại gần một địa điểm trên bản đồ rồi bấm Khám phá.');return}
  let ci=-1;for(let i=0;i<CLUELIST.length;i++)if(!foundSet[i]&&CLUELIST[i].spot===near.id){ci=i;break}
@@ -299,7 +316,7 @@ $('fnext').addEventListener('click',()=>{
 function finish(){setClue();openProfile(me,$('act'),true)}
 $('act').addEventListener('click',explore);
 document.addEventListener('keydown',e=>{
- if($('overlay').classList.contains('show')||$('found').classList.contains('show')){if(e.key==='Escape'){if($('overlay').classList.contains('show'))closeProfile()}return}
+ if($('overlay').classList.contains('show')||$('found').classList.contains('show')||($('wishzone')&&$('wishzone').classList.contains('show'))||$('riddle')){if(e.key==='Escape'){if($('overlay').classList.contains('show'))closeProfile()}return}
  const k=e.key.toLowerCase();
  if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)&&running){keys[k]=true;target=null;e.preventDefault()}
  if((k===' '||k==='enter')&&running&&document.activeElement===document.body){e.preventDefault();explore()}
@@ -323,14 +340,14 @@ function loop(now){
  near=null;let nd=1e9;
  SPOTS.forEach(s=>{const d=Math.hypot(s.x-player.x,s.y-player.y);if(d<RAD&&d<nd){nd=d;near=s}});
  $('act').disabled=!near&&clueIdx<CLUELIST.length;
- $('act').textContent=clueIdx>=CLUELIST.length?'Mở hồ sơ':(near?'Khám phá: '+near.name:'Khám phá');
+ $('act').textContent=(near&&near.id==='wish')?'Đọc lời chúc':(clueIdx>=CLUELIST.length?'Mở hồ sơ':(near?'Khám phá: '+near.name:'Khám phá'));
  draw(now);requestAnimationFrame(loop);
 }
 function rr(x,y,w,h,r,fill,stroke){cx.beginPath();cx.roundRect?cx.roundRect(x,y,w,h,r):cx.rect(x,y,w,h);if(fill){cx.fillStyle=fill;cx.fill()}if(stroke){cx.strokeStyle=stroke;cx.lineWidth=2;cx.stroke()}}
 function circ(x,y,r,fill,stroke){cx.beginPath();cx.arc(x,y,r,0,7);if(fill){cx.fillStyle=fill;cx.fill()}if(stroke){cx.strokeStyle=stroke;cx.lineWidth=2;cx.stroke()}}
 /* ---------- pixel office scene (The Winds style) ---------- */
 const SC=document.createElement('canvas');SC.width=600;SC.height=390;
-const OFF={elev:[35,0],glass:[82,0],navy:[122,0],flowers:[118,0],win:[170,0],wallart:[54,0],gates:[35,42],rug:[100,66],sofa:[25,72],pool:[60,72],cab:[191,30],table:[139,111],desks:[40,107],bin:[66,87],board:[136,0],pantry:[152,70],cinema:[102,113],studio:[174,109]};
+const OFF={wish:[0,0],elev:[35,0],glass:[82,0],navy:[122,0],flowers:[118,0],win:[170,0],wallart:[54,0],gates:[35,42],rug:[100,66],sofa:[25,72],pool:[60,72],cab:[191,30],table:[139,111],desks:[40,107],bin:[66,87],board:[136,0],pantry:[152,70],cinema:[102,113],studio:[174,109]};
 function buildScene(){
  const c=SC.getContext('2d');
  const R=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
@@ -457,8 +474,11 @@ function buildScene(){
  // nhãn cho từng khu vực
  {const F={A:'010101111101101',B:'110101110101110',C:'111100100100111',D:'110101101101110',E:'111100110100111',F:'111100110100100',G:'111100101101111',H:'101101111101101',I:'111010010010111',K:'101101110101101',L:'100100100100111',M:'101111111101101',N:'110101101101101',O:'111101101101111',P:'111101111100100',R:'111101110101101',S:'111100111001111',T:'111010010010010',U:'101101101101111',V:'101101101101010',W:'101101111111101',Y:'101101010010010',' ':'000000000000000','-':'000000111000000','5':'111100111001111'};
  const PG=(k,cx,y,t)=>{c.save();c.translate(OFF[k][0],OFF[k][1]);P(cx,y,t);c.restore()};const P=(cx,y,t)=>{const w=t.length*4+3,x0=Math.round(cx-w/2);R(x0-1,y-1,w+2,9,'#d7a84a');R(x0,y,w,7,'#14122a');[...t].forEach((ch,i)=>{const g=F[ch];for(let k=0;k<15;k++)if(g[k]==='1')R(x0+2+i*4+k%3,y+1+((k/3)|0),1,1,'#ffd27a')})};
- PG('elev',70,52,'THANG MAY');PG('win',345,52,'CUA SO');PG('sofa',52,121,'SOFA');PG('desks',70,178,'BAN LAM VIEC');PG('rug',200,93,'BAN TIEC');PG('studio',350,186,'STUDIO');PG('board',277,98,'BANG VIEC');PG('pantry',300,112,'PANTRY');PG('pool',120,120,'BI-A PS5');PG('cab',368,63,'TRUNG BAY');PG('table',280,195,'SINH HOAT CHUNG')}
- // corner plants
+ PG('elev',70,52,'THANG MAY');PG('win',345,52,'CUA SO');PG('sofa',52,121,'SOFA');PG('desks',70,178,'BAN LAM VIEC');PG('rug',200,93,'BAN TIEC');PG('studio',350,186,'STUDIO');PG('board',277,98,'BANG VIEC');PG('pantry',300,112,'PANTRY');PG('pool',120,120,'BI-A PS5');PG('cab',368,63,'TRUNG BAY');PG('table',280,195,'SINH HOAT CHUNG');PG('wish',458,121,'DOC LOI CHUC')}
+ // khu đọc lời chúc cạnh bảng việc
+ R(434,62,48,38,'#5c3a22');R(436,64,44,34,'#7a4b2a');R(438,66,40,30,'#f3ecda');
+ [[441,69,'#f4a3c0'],[455,69,'#ffd27a'],[468,69,'#8fcf7e'],[441,82,'#9ad0e8'],[455,83,'#f4a3c0'],[468,82,'#ffd27a']].forEach(q=>{R(q[0],q[1],9,7,'#ffffff');R(q[0],q[1],9,1,q[2]);R(q[0]+1,q[1]+1,7,1,q[2]);R(q[0]+4,q[1]+3,2,2,'#d94a4a')});
+ R(450,100,16,16,'#d94a4a');R(452,102,12,3,'#7a1f2a');R(450,114,16,2,'rgba(30,10,20,.35)');R(456,106,4,4,'#fff3b0');
  PL(2,70);PL(2,366);PL(584,356);PL(236,310);PL(430,280);PL(20,200);PL(300,70);
 }
 buildScene();
