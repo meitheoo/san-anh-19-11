@@ -1,5 +1,1 @@
-// Dán 2 giá trị lấy từ Supabase (Project Settings > API) vào đây.
-window.APP_CONFIG = {
-  SUPABASE_URL: "",
-  SUPABASE_ANON_KEY: ""
-};
+window.APP_CONFIG = { SUPABASE_URL: "https://cysndzkilinfzrkoganz.supabase.co", SUPABASE_ANON_KEY: "sb_publishable_2jN28A_covtCJQ1rwdF1Uw_7RvE9dS2" };
