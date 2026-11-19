@@ -2,7 +2,7 @@
 
 create table if not exists public.wishes (
   id uuid primary key default gen_random_uuid(),
-  to_id text not null check (to_id in ('khoi','cong','tuananh','nam')),
+  to_id text not null check (to_id in ('khoi','cong','tuananh','nam','tin')),
   from_name text not null check (char_length(from_name) between 1 and 40),
   text text not null check (char_length(text) between 1 and 600),
   created_at timestamptz not null default now()
