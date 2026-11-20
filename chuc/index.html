@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess4GenZ chúc mừng 20.11</title>
+<meta name="theme-color" content="#f4f1ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Hanken+Grotesk:wght@400;600&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=IBM+Plex+Mono:wght@400;500&family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4f1ea;--ink:#2c4463;--soft:#5d7392;--accent:#b4412f;--sq-d:#8aa0bd;
+--display:"Big Shoulders Display","Be Vietnam Pro",sans-serif;--body:"Hanken Grotesk","Be Vietnam Pro",system-ui,sans-serif;--serif:"Cormorant Garamond","Be Vietnam Pro",Georgia,serif;--mono:"IBM Plex Mono","Be Vietnam Pro",ui-monospace,monospace}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.6;min-height:100%}
+.ticker{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;border-bottom:1px solid var(--ink);padding:.5rem 0;overflow:hidden;white-space:nowrap}
+.ticker span{display:inline-block;padding-left:100%;animation:slide 36s linear infinite}
+@keyframes slide{to{transform:translateX(-100%)}}
+main{max-width:560px;margin:0 auto;padding:1.5rem 1.25rem 3rem;display:flex;flex-direction:column;gap:1.5rem}
+.top{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;color:var(--soft)}
+.top b{font-family:var(--display);font-weight:900;font-size:1.4rem;letter-spacing:.04em;color:var(--ink)}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(3.4rem,20vw,6.5rem);line-height:.9;margin:0;text-transform:uppercase}
+h1 em{font-style:normal;color:var(--accent)}
+.sub{font-family:var(--serif);font-size:1.5rem;line-height:1.3;margin:0}
+.strip{display:grid;grid-template-columns:repeat(8,1fr);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);margin:0 6px 6px 0;container-type:inline-size}
+.strip div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:9cqw;font-family:"Noto Sans Symbols 2","Segoe UI Symbol","DejaVu Sans",sans-serif;color:#1c2c44}
+.strip div:nth-child(odd){background:var(--paper)}.strip div:nth-child(even){background:var(--sq-d)}
+.strip div.k{color:var(--accent);animation:pop 2.4s ease-in-out infinite}
+@keyframes pop{0%,70%,100%{transform:scale(1)}85%{transform:scale(1.25)}}
+.wish p{margin:0 0 1rem;font-size:1.1rem}
+.wish p:first-child{font-family:var(--serif);font-size:1.6rem}
+.sign{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.ticker span{animation:none;padding-left:1rem}.strip div.k{animation:none}}
+</style>
+</head>
+<body>
+<div class="ticker" aria-hidden="true"><span>Create narratives worth living · Chess4GenZ · 20.11 · Ngày Nhà giáo Việt Nam · Chess4GenZ · Create narratives worth living</span></div>
+<main>
+  <div class="top"><b>CHESS4GENZ</b><span>CH. 20 / 11</span></div>
+  <h1>Chúc mừng <em>20.11</em></h1>
+  <p class="sub">Gửi các thầy, những người dạy tụi em đi từng nước cờ.</p>
+  <div class="strip" aria-hidden="true">
+    <div>♜</div><div>♞</div><div>♝</div><div class="k">♛</div><div>♚</div><div>♝</div><div>♞</div><div>♜</div>
+  </div>
+  <section class="wish">
+    <p>Cảm ơn các thầy.</p>
+    <p>Cảm ơn vì đã dạy tụi em nhìn trước ba nước đi, giữ bình tĩnh khi thế cờ xấu, và thua mà vẫn muốn chơi tiếp ván sau.</p>
+    <p>Chúc các thầy ngày Nhà giáo Việt Nam thật khỏe, thật vui, và luôn có những học trò dám đi những nước cờ hay.</p>
+    <p class="sign">Chess4GenZ · 20.11</p>
+  </section>
+</main>
+</body>
+</html>
